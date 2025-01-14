@@ -8,30 +8,39 @@
 #
 
 library(shiny)
-
+library(ggplot2)
 #Compilation des exercices
-fluidPage(
+#
+# This is the server logic of a Shiny web application. You can run the
+# application by clicking 'Run App' above.
+#
+# Find out more about building applications with Shiny here:
+#
+#    http://shiny.rstudio.com/
+#
+
+library(shiny)
+
+# Define server logic required to draw a histogram
+function(input, output, session) {
+  output$salutation <- renderText({
+    paste0("Bonjour ", input$nom)
+  })
   
-  # Application title
-  titlePanel("Hello Shiny!"),
+  output$le_texte <- renderText({ 
+    input$curseur*input$curseur2
+  })
   
-  # Sidebar with a text input and slider inputs
-  sidebarLayout(
-    sidebarPanel(
-      textInput("nom", "Quel est ton nom ?"),
-      sliderInput("curseur", label = "Si x est ", min = 1, max = 100, value = 30), 
-      sliderInput("curseur2", label = "Si y est ", min = 1, max = 100, value = 5), 
-      "alors x * y est : ",
-      selectInput("dataset", "Dataset", choices = c("economics", "faithfuld", "seals"))
-    ),
-    
-    # Main panel with outputs
-    mainPanel(
-      h1(textOutput("salutation")), 
-      h3(textOutput("le_texte")),  
-      verbatimTextOutput("summary"),
-      plotOutput("le_graphe")
-    )
-  )
-)
+  
+  dataset <- reactive({get(input$dataset, "package:ggplot2")
+  })
+  
+  output$summary <- renderPrint({
+    summary(dataset())
+  })
+  
+  output$le_graphe <- renderPlot({
+    plot(dataset())
+  }, res = 96)
+}
 
